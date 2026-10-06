@@ -58,6 +58,8 @@ p{font-size:12px;opacity:.7;margin:8px 0 0;text-align:center;max-width:320px}
 <script>
 const DREAMLO_PUBLIC = "6ac4f8798f40bb15a8cf5521";
 const DREAMLO_PRIVATE = "37a6eyeTt0ezA3ROZSCH8w2iHzT-T_REWhMSzuz8hj6g";
+// Proxy para contornar o bloqueio de CORS do GitHub Pages
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 
 const W=7,H=12,C=40,FD=260,GD=240,COL=['','#111111','#111111','#111111','#111111','#111111','#111111'];
 const IV='#f9f9f9',P={1:[[.5,.5]],2:[[.27,.27],[.73,.73]],3:[[.27,.27],[.5,.5],[.73,.73]],4:[[.27,.27],[.73,.27],[.27,.73],[.73,.73]],5:[[.27,.27],[.73,.27],[.5,.5],[.27,.73],[.73,.73]],6:[[.27,.5],[.73,.5],[.5,.27],[.5,.73]]};
@@ -75,7 +77,8 @@ async function atualizarPlacar() {
   const lista = document.getElementById('rankList');
   lista.innerHTML = '<li>Carregando...</li>';
   try {
-    const res = await fetch(`https://www.dreamlo.com/lb/${DREAMLO_PUBLIC}/json`);
+    const targetUrl = `https://www.dreamlo.com/lb/${DREAMLO_PUBLIC}/json`;
+    const res = await fetch(CORS_PROXY + encodeURIComponent(targetUrl));
     const data = await res.json();
     let html = '';
     
@@ -118,16 +121,15 @@ function spawn(){
     if(score > 0) {
       let nome = prompt("Fim de Jogo! Qual seu nome para o placar online?", "Gustavo");
       if(nome) {
-        // Remove espaços e acentos para evitar erros na URL do Dreamlo
-        let nomeFormatado = nome.substring(0,12).replace(/[^a-zA-Z0-9]/g, '');
+        let nomeFormatado = encodeURIComponent(nome.substring(0,12).replace(/[^a-zA-Z0-9]/g, ''));
         if(!nomeFormatado) nomeFormatado = "Anonimo";
         
         document.getElementById('rankBoard').style.display='block';
         document.getElementById('rankList').innerHTML = '<li>Enviando pontuação...</li>';
         
-        // mode: 'no-cors' ignora bloqueios de CORS. E usamos o then para atualizar após 600ms.
-        fetch(`https://www.dreamlo.com/lb/${DREAMLO_PRIVATE}/add/${nomeFormatado}/${score}`, { mode: 'no-cors' })
-          .then(() => setTimeout(atualizarPlacar, 600))
+        const targetAddUrl = `https://www.dreamlo.com/lb/${DREAMLO_PRIVATE}/add/${nomeFormatado}/${score}`;
+        fetch(CORS_PROXY + encodeURIComponent(targetAddUrl))
+          .then(() => setTimeout(atualizarPlacar, 800))
           .catch(() => {
             document.getElementById('rankList').innerHTML = '<li>Erro ao conectar ao servidor.</li>';
           });
@@ -211,5 +213,5 @@ addEventListener('keydown',e=>{const k=e.key;
 init();atualizarPlacar();frame();loop();
 </script>
 </body>
-  </html>
-  
+                                                                                                                  </html>
+    
